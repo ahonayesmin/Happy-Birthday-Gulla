@@ -1,0 +1,198 @@
+<!doctype html>
+
+<html lang="bn">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>শুভ জন্মদিন — Gulla</title>
+  <style>
+    :root{
+      --bg1: linear-gradient(180deg,#ffeef6 0%, #fff0f8 50%);
+      --accent:#ff5c8a;
+      --muted:#6b7280;
+    }
+    html,body{height:100%;margin:0;font-family:Inter, 'Noto Sans Bengali', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;color:#111}
+    .page{min-height:100%;display:flex;align-items:center;justify-content:center;padding:20px;background:var(--bg1);}
+    .stage{width:100%;max-width:960px;border-radius:20px;padding:18px;box-shadow:0 8px 40px rgba(12,18,28,0.08);background:rgba(255,255,255,0.9);position:relative;overflow:hidden}/* Countdown overlay */
+.countdown-wrap{display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;padding:40px}
+.countdown-num{font-size:84px;font-weight:800;color:var(--accent);letter-spacing:2px}
+.countdown-sub{font-size:18px;color:var(--muted)}
+
+/* Main message */
+.main-msg{display:none;align-items:center;justify-content:center;flex-direction:column;padding:40px;gap:14px}
+.headline{font-size:36px;font-weight:900;text-align:center}
+.headline .small{display:block;font-size:20px;font-weight:700;margin-top:6px}
+
+/* balloons container */
+.balloon-stage{pointer-events:none;position:absolute;left:0;top:0;width:100%;height:100%;overflow:hidden}
+
+.balloon{position:absolute;bottom:-140px;width:56px;height:80px;border-radius:28px 28px 24px 24px;display:flex;align-items:center;justify-content:center;font-size:20px;color:#111;font-weight:700;transform-origin:center bottom}
+.balloon::after{content:'';position:absolute;width:2px;height:90px;background:linear-gradient(#cfcfcf,#eee);left:50%;transform:translateX(-50%);bottom:-92px}
+.balloon .knot{position:absolute;bottom:-8px;width:10px;height:8px;background:rgba(0,0,0,0.08);border-radius:2px}
+
+/* heart floating */
+.heart{position:absolute;bottom:-40px;font-size:22px;opacity:0.96}
+
+/* replay button */
+.controls{display:flex;gap:10px;align-items:center;justify-content:center;margin-top:6px}
+.btn{background:linear-gradient(90deg,var(--accent),#ff9fb0);border:none;padding:10px 14px;border-radius:12px;color:white;font-weight:700;cursor:pointer}
+.btn.secondary{background:transparent;border:1px solid rgba(0,0,0,0.06);color:var(--accent)}
+
+/* responsive */
+@media (max-width:600px){
+  .countdown-num{font-size:56px}
+  .headline{font-size:26px}
+  .balloon{width:44px;height:64px;font-size:16px}
+}
+
+/* animation keyframes for motion */
+@keyframes rise {
+  0%{transform: translateY(0) rotate(0deg); opacity:1}
+  100%{transform: translateY(-130vh) rotate(360deg); opacity:0.92}
+}
+@keyframes wiggleX {
+  0%{transform:translateX(0)}
+  50%{transform:translateX(18px)}
+  100%{transform:translateX(0)}
+}
+
+/* subtle background hearts */
+.bg-heart{position:absolute;right:10px;top:12px;font-size:42px;opacity:0.08;transform:rotate(-12deg)}
+
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="stage" role="region" aria-label="Birthday animation"><div class="countdown-wrap" id="countdownWrap">
+    <div class="countdown-num" id="countdown">10</div>
+    <div class="countdown-sub">শুরু হতে আর — সেকেন্ড</div>
+    <div style="font-size:14px;color:var(--muted)">মোবাইল রেসপনসিভ। অপেক্ষা করো — সারপ্রাইজ আসছে 🎁</div>
+  </div>
+
+  <div class="main-msg" id="mainMsg">
+    <div class="headline" id="headline">HAPPY BIRTHDAY TO YOU GULLA🥹💖<span class="small">তুমি আমার সবকিছু</span></div>
+    <div class="controls">
+      <button class="btn" id="replayBtn">আরেকবার চালাও</button>
+      <button class="btn secondary" id="customBtn">কাস্টম টেক্সট</button>
+    </div>
+  </div>
+
+  <div class="balloon-stage" id="balloonStage" aria-hidden="true"></div>
+  <div class="bg-heart">💗</div>
+
+</div>
+
+  </div>  <script>
+    // Mobile responsive and countdown logic
+    const countdownEl = document.getElementById('countdown');
+    const countdownWrap = document.getElementById('countdownWrap');
+    const mainMsg = document.getElementById('mainMsg');
+    const balloonStage = document.getElementById('balloonStage');
+    const replayBtn = document.getElementById('replayBtn');
+    const customBtn = document.getElementById('customBtn');
+    const headline = document.getElementById('headline');
+
+    let t = 10; // 10 seconds
+    let countdownInterval;
+
+    function startCountdown(){
+      t = 10;
+      countdownEl.textContent = t;
+      countdownWrap.style.display = 'flex';
+      mainMsg.style.display = 'none';
+      clearInterval(countdownInterval);
+      countdownInterval = setInterval(()=>{
+        t--;
+        countdownEl.textContent = t;
+        if(t<=0){
+          clearInterval(countdownInterval);
+          showMain();
+        }
+      },1000);
+    }
+
+    function randomBetween(a,b){return Math.random()*(b-a)+a}
+
+    function createBalloon(xPercent, size, color, delay, duration, emoji){
+      const b = document.createElement('div');
+      b.className = 'balloon';
+      b.style.left = xPercent + '%';
+      b.style.width = size + 'px';
+      b.style.height = Math.round(size*1.25) + 'px';
+      b.style.background = `radial-gradient(circle at 35% 25%, rgba(255,255,255,0.7), rgba(255,255,255,0.05)), ${color}`;
+      b.style.animation = `rise ${duration}s linear ${delay}s forwards`;
+      b.style.zIndex = 10;
+      // small horizontal sway
+      b.style.setProperty('--sway', randomBetween(-30,30)+'px');
+      // add emoji or letter
+      b.textContent = emoji || '';
+      const knot = document.createElement('div'); knot.className='knot'; b.appendChild(knot);
+      balloonStage.appendChild(b);
+      // remove after animation
+      setTimeout(()=>{ try{ balloonStage.removeChild(b);}catch(e){} }, (delay+duration+1)*1000);
+    }
+
+    function createHeart(xPercent, delay, duration){
+      const h = document.createElement('div');
+      h.className = 'heart';
+      h.style.left = xPercent + '%';
+      h.style.animation = `rise ${duration}s ease-in ${delay}s forwards`;
+      h.textContent = '💖';
+      h.style.fontSize = (randomBetween(18,34))+'px';
+      balloonStage.appendChild(h);
+      setTimeout(()=>{ try{ balloonStage.removeChild(h);}catch(e){} }, (delay+duration+1)*1000);
+    }
+
+    function burstBalloons(){
+      // create multiple balloons with random positions/colors/durations
+      const colors = ['#ff87b5','#ffd1dc','#ff9fb0','#ffe08a','#ffd6a5','#c6f7e2','#d6c8ff'];
+      for(let i=0;i<18;i++){
+        const x = randomBetween(5,95);
+        const size = randomBetween(window.innerWidth<600?38:46, window.innerWidth<600?72:92);
+        const color = colors[Math.floor(Math.random()*colors.length)];
+        const delay = randomBetween(0,3);
+        const duration = randomBetween(6,14);
+        const emoji = (Math.random()<0.3)?'🎈':'❤️';
+        createBalloon(x,size,color,delay,duration, emoji);
+      }
+      // add hearts floating slower
+      for(let j=0;j<12;j++){
+        createHeart(randomBetween(10,90), randomBetween(0,4), randomBetween(8,16));
+      }
+    }
+
+    function showMain(){
+      countdownWrap.style.display = 'none';
+      mainMsg.style.display = 'flex';
+      // animate balloons & hearts
+      burstBalloons();
+      // continuous small bursts every few seconds
+      window._balloonTimer = setInterval(burstBalloons, 4500);
+      // small celebration pulse on headline
+      headline.animate([{transform:'scale(0.98)'},{transform:'scale(1.06)'},{transform:'scale(1)'}],{duration:900,iterations:2});
+    }
+
+    replayBtn.addEventListener('click', ()=>{
+      // clear existing balloons
+      clearInterval(window._balloonTimer);
+      balloonStage.innerHTML = '';
+      startCountdown();
+    });
+
+    customBtn.addEventListener('click', ()=>{
+      const txt = prompt('তুমি কি লেখতে চাও? (উদাহরণ: HAPPY BIRTHDAY TO YOU GULLA🥹💖)');
+      if(txt!==null){ headline.childNodes[0].nodeValue = txt; }
+    });
+
+    // start automatically on load
+    window.addEventListener('load', ()=>{
+      startCountdown();
+    });
+
+    // make sure stage resizes nicely on orientation change
+    window.addEventListener('orientationchange', ()=>{ /* nothing extra needed */ });
+
+    // Accessibility: allow keyboard to trigger replay via R
+    window.addEventListener('keyup',(e)=>{ if(e.key==='r' || e.key==='R') replayBtn.click(); });
+  </script></body>
+</html>
